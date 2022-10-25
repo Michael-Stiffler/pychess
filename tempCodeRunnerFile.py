@@ -1,2 +1,2 @@
-
-        (x, y) = py.mouse.get_pos()
+')
+board.parse_fen()
