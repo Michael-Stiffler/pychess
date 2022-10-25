@@ -61,7 +61,7 @@ class Board():
                  'bR', 'wB', 'wK', 'wN', 'wP', 'wQ', 'wR']
         for piece in pieces:
             source_file_dir = os.path.dirname(os.path.abspath(os.getcwd()))
-            image_path = os.path.join(source_file_dir, "better-chess\\piece-images\\" + piece + '.png')
+            image_path = os.path.join(source_file_dir, "better-chess\\piece_images\\" + piece + '.png')
             self.IMAGES[piece] = py.transform.scale(py.image.load(image_path), (self.SIZE, self.SIZE))
             
     def draw_pieces(self):

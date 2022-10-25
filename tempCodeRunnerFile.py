@@ -1,2 +1,0 @@
-')
-board.parse_fen()
