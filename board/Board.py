@@ -7,6 +7,7 @@ from piece.Knight import Knight
 from piece.Pawn import Pawn
 from piece.Queen import Queen
 from piece.Rook import Rook
+from board.AlgebraicNotation import AlgebraicNotation
 
 class Board():
     
@@ -20,11 +21,13 @@ class Board():
         
         #self explanatory
         self.pieces_on_board = []
+        self.list_of_all_moves = []
         self.white_to_move = True
         self.en_passant_target_square = ""
         self.current_user_square = None
         self.display = display       
         self.fen = fen 
+        self.an = AlgebraicNotation()
         
         #holds the board with all the squares and if there is a piece then an object is there, else it is NoneType
         self.board = [[None for i in range(self.LENGTH)] for j in range(self.LENGTH)]
@@ -64,7 +67,7 @@ class Board():
     def draw_pieces(self):
         for x in range(self.LENGTH):
             for y in range(self.LENGTH):
-                piece = self.board[x][y]
+                piece = self.board[y][x]
                 if piece:
                     self.display.blit(self.IMAGES[piece.filename], py.Rect(y*self.SIZE, x*self.SIZE, self.SIZE, self.SIZE))
                     
@@ -98,13 +101,30 @@ class Board():
     
     def get_piece_moves(self):
         for piece in self.pieces_on_board:
-            print(piece)
-   
+            pass
+            
+    def check_user_move(self, start_square, end_square):
+        #TODO: implement... there is much more to this than I thought lol
+        
+        #if the user selected a square with a piece
+        if self.board[start_square[0]][start_square[1]]:  
+            #only 2* options on a move. Piece ends on an empty square, or it lands on a piece of another color (capture)
+            if self.board[end_square[0]][end_square[1]] is None or self.board[start_square[0]][start_square[1]].color != self.board[end_square[0]][end_square[1]].color:
+                is_capture = True if self.board[end_square[0]][end_square[1]] != None else False  # if the destination square is a piece, it could be a capture
+                move = self.an.get_piece_algebraic_notation(start_square, end_square, is_capture)
+                if move in self.list_of_all_moves:
+                    return move
+                return None
         
     def parse_fen(self):
+        
         # parse fen from this -> rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
         # to this -> ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'w', 'KQkq', '-', '0', '1']
-        #rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9
+        
+        #Handle each part of the fen (in the list) with the following
+        
+        #For now I am ignoring fullmove counter and halfmove clock
+
         split_fen = self.fen.split(" ")
         self.parse_ranks_on_fen(split_fen[0])
         
@@ -125,9 +145,9 @@ class Board():
                 for y in range(int(ranks[x])):
                     piece_positions.append("0")
     
-        for x in range(self.LENGTH):
-            for y in range(self.LENGTH):
-                index = (x * self.LENGTH) + y 
+        for y in range(self.LENGTH):
+            for x in range(self.LENGTH):
+                index = (y * self.LENGTH) + x
                 if piece_positions[index].lower() == "p":
                     if piece_positions[index].isupper():
                         pawn = Pawn(x, y, self.WHITE, filename="wP")
