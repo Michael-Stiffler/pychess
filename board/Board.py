@@ -28,6 +28,7 @@ class Board():
         self.display = display       
         self.fen = fen 
         self.an = AlgebraicNotation()
+        self.piece_held = None
         
         #holds the board with all the squares and if there is a piece then an object is there, else it is NoneType
         self.board = [[None for i in range(self.LENGTH)] for j in range(self.LENGTH)]
@@ -70,6 +71,21 @@ class Board():
                 piece = self.board[y][x]
                 if piece:
                     self.display.blit(self.IMAGES[piece.filename], py.Rect(y*self.SIZE, x*self.SIZE, self.SIZE, self.SIZE))
+    
+    def drag_piece(self, mouse_pos):
+        for x in range(self.LENGTH):
+            for y in range(self.LENGTH):
+                piece = self.board[y][x]
+                if piece == self.piece_held:
+                    self.display.blit(self.IMAGES[self.piece_held.filename], (mouse_pos[0] - 50, mouse_pos[1] - 50))
+                elif piece:
+                    self.display.blit(self.IMAGES[piece.filename], py.Rect(y*self.SIZE, x*self.SIZE, self.SIZE, self.SIZE))
+                    
+    def get_square_from_mouse_pos(self, mouse_pos):
+        return (math.floor(mouse_pos[0] / self.SIZE), math.floor(mouse_pos[1] / self.SIZE))
+    
+    def return_piece_on_square(self, square_coordinates):
+        return self.board[square_coordinates[0]][square_coordinates[1]]
                     
     def show_square(self, mouse_position):
         # this is for debugging purposes
