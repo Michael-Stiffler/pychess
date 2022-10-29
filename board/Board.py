@@ -77,9 +77,11 @@ class Board():
             for y in range(self.LENGTH):
                 piece = self.board[y][x]
                 if piece == self.piece_held:
-                    self.display.blit(self.IMAGES[self.piece_held.filename], (mouse_pos[0] - 50, mouse_pos[1] - 50))
+                    continue
                 elif piece:
                     self.display.blit(self.IMAGES[piece.filename], py.Rect(y*self.SIZE, x*self.SIZE, self.SIZE, self.SIZE))
+        self.display.blit(self.IMAGES[self.piece_held.filename], (mouse_pos[0] - 50, mouse_pos[1] - 50))
+
                     
     def get_square_from_mouse_pos(self, mouse_pos):
         return (math.floor(mouse_pos[0] / self.SIZE), math.floor(mouse_pos[1] / self.SIZE))
@@ -117,20 +119,48 @@ class Board():
     
     def get_piece_moves(self):
         for piece in self.pieces_on_board:
-            pass
+            self.list_of_all_moves.append(piece.get_moves(self.board))
             
     def check_user_move(self, start_square, end_square):
         #TODO: implement... there is much more to this than I thought lol
         
+        piece = self.board[start_square[0]][start_square[1]]
+        destination = self.board[end_square[0]][end_square[1]]
         #if the user selected a square with a piece
-        if self.board[start_square[0]][start_square[1]]:  
+        if piece:  
             #only 2* options on a move. Piece ends on an empty square, or it lands on a piece of another color (capture)
-            if self.board[end_square[0]][end_square[1]] is None or self.board[start_square[0]][start_square[1]].color != self.board[end_square[0]][end_square[1]].color:
-                is_capture = True if self.board[end_square[0]][end_square[1]] != None else False  # if the destination square is a piece, it could be a capture
-                move = self.an.get_piece_algebraic_notation(start_square, end_square, is_capture)
+            if destination is None or piece.color != destination.color:
+                is_capture = True if destination != None else False  # if the destination square is a piece, it will be a capture
+                is_same_piece_on_rank = False
+                is_same_piece_on_file = False                         
+                move = self.an.get_piece_algebraic_notation(piece, start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                print(move)
                 if move in self.list_of_all_moves:
                     return move
                 return None
+            
+    def is_piece_on_same_file(self, piece):
+        for y in range(self.LENGTH):
+            if y == piece.y:
+                continue
+            square_on_file = self.board[piece.x][y]
+            if type(square_on_file) == type(piece):
+                if square_on_file.color == piece.color:
+                    reutrn = True
+        return False
+    
+    def is_piece_on_same_rank(self, piece):
+        for x in range(self.LENGTH):
+            if x == piece.x:
+                continue
+            square_on_rank = self.board[x][piece.y]
+            if type(square_on_rank) == type(piece):
+                if square_on_rank.color == piece.color:
+                    reutrn = True
+        return False
+                    
+    def make_move(self):
+        pass
         
     def parse_fen(self):
         
