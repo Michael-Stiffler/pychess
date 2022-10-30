@@ -1,34 +1,8 @@
-from piece.Bishop import Bishop
-from piece.King import King
-from piece.Knight import Knight
-from piece.Pawn import Pawn
-from piece.Queen import Queen
-from piece.Rook import Rook
-
 
 class AlgebraicNotation():
     def __init__(self):
         self.files = [x for x in range(1, 9)]
         self.ranks = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-        
-    def get_pawn_algebraic_notation():
-        pass
-    
-    def get_piece_algebraic_notation(self, piece, start, end, is_capture, is_same_piece_on_rank, is_same_piece_on_file):
-        #TODO: implement
-        
-        if isinstance(piece, Pawn):
-            return self.get_pawn_algebraic_notation(start, end, is_capture)
-        elif isinstance(piece, Knight):
-            return self.get_knight_algebraic_notation(start, end, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
-        elif isinstance(piece, Bishop):
-            return self.get_bishop_algebraic_notation(start, end, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
-        elif isinstance(piece, Queen):
-            return self.get_queen_algebraic_notation(start, end, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
-        elif isinstance(piece, Rook):
-            return self.get_rook_algebraic_notation(start, end, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
-        elif isinstance(piece, King):
-            return self.get_king_algebraic_notation(start, end, is_capture)
         
     def get_pawn_algebraic_notation(self, start, end, is_capture):
         #TODO EN PASSANT

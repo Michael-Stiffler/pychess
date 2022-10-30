@@ -22,7 +22,7 @@ class Board():
         #self explanatory
         self.pieces_on_board = []
         self.list_of_all_moves = []
-        self.white_to_move = True
+        self.color_to_move = self.WHITE
         self.en_passant_target_square = ""
         self.current_user_square = None
         self.display = display       
@@ -62,32 +62,38 @@ class Board():
                  'bR', 'wB', 'wK', 'wN', 'wP', 'wQ', 'wR']
         for piece in pieces:
             source_file_dir = os.path.dirname(os.path.abspath(os.getcwd()))
-            image_path = os.path.join(source_file_dir, "better-chess\\piece_images\\" + piece + '.png')
+            image_path = os.path.join(source_file_dir, "pychess\\piece_images\\" + piece + '.png')
             self.IMAGES[piece] = py.transform.scale(py.image.load(image_path), (self.SIZE, self.SIZE))
             
     def draw_pieces(self):
         for x in range(self.LENGTH):
             for y in range(self.LENGTH):
-                piece = self.board[y][x]
+                piece = self.board[x][y]
                 if piece:
-                    self.display.blit(self.IMAGES[piece.filename], py.Rect(y*self.SIZE, x*self.SIZE, self.SIZE, self.SIZE))
+                    self.display.blit(self.IMAGES[piece.filename], py.Rect(piece.x*self.SIZE, piece.y*self.SIZE, self.SIZE, self.SIZE))
     
     def drag_piece(self, mouse_pos):
         for x in range(self.LENGTH):
             for y in range(self.LENGTH):
-                piece = self.board[y][x]
+                piece = self.board[x][y]
                 if piece == self.piece_held:
                     continue
                 elif piece:
-                    self.display.blit(self.IMAGES[piece.filename], py.Rect(y*self.SIZE, x*self.SIZE, self.SIZE, self.SIZE))
+                    self.display.blit(self.IMAGES[piece.filename], py.Rect(piece.x*self.SIZE, piece.y*self.SIZE, self.SIZE, self.SIZE))
         self.display.blit(self.IMAGES[self.piece_held.filename], (mouse_pos[0] - 50, mouse_pos[1] - 50))
+        
 
+    def draw_moves(self):
+        moves = self.piece_held.moves_no_algebraic_notation
+        for move in moves:
+            py.draw.circle(self.display, self.highlight_color, [
+                                self.SIZE*(move[0] + 1) - (self.SIZE / 2), self.SIZE*(move[1] + 1) - (self.SIZE / 2)], 25)
                     
     def get_square_from_mouse_pos(self, mouse_pos):
         return (math.floor(mouse_pos[0] / self.SIZE), math.floor(mouse_pos[1] / self.SIZE))
     
     def return_piece_on_square(self, square_coordinates):
-        return self.board[square_coordinates[0]][square_coordinates[1]]
+        return self.board[square_coordinates[1]][square_coordinates[0]]
                     
     def show_square(self, mouse_position):
         # this is for debugging purposes
@@ -118,22 +124,41 @@ class Board():
         
     
     def get_piece_moves(self):
+        self.list_of_all_moves = []
         for piece in self.pieces_on_board:
-            self.list_of_all_moves.append(piece.get_moves(self.board))
+            if piece.color == self.color_to_move:
+                moves = piece.get_moves(self.board)
+                if moves:
+                    for move in moves:
+                        self.list_of_all_moves.append(move)
+        print(self.list_of_all_moves)
             
     def check_user_move(self, start_square, end_square):
         #TODO: implement... there is much more to this than I thought lol
         
-        piece = self.board[start_square[0]][start_square[1]]
-        destination = self.board[end_square[0]][end_square[1]]
+        piece = self.board[start_square[1]][start_square[0]]
+        destination = self.board[end_square[1]][end_square[0]]
         #if the user selected a square with a piece
-        if piece:  
+        if piece and piece.color == self.color_to_move:  
             #only 2* options on a move. Piece ends on an empty square, or it lands on a piece of another color (capture)
             if destination is None or piece.color != destination.color:
                 is_capture = True if destination != None else False  # if the destination square is a piece, it will be a capture
                 is_same_piece_on_rank = False
-                is_same_piece_on_file = False                         
-                move = self.an.get_piece_algebraic_notation(piece, start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                is_same_piece_on_file = False
+                
+                if isinstance(piece, Pawn):
+                    move = self.an.get_pawn_algebraic_notation(start_square, end_square, is_capture)
+                elif isinstance(piece, Knight):
+                    move = self.an.get_knight_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                elif isinstance(piece, Bishop):
+                    move = self.an.get_bishop_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                elif isinstance(piece, Queen):
+                    move = self.an.get_queen_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                elif isinstance(piece, Rook):
+                    move = self.an.get_rook_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                elif isinstance(piece, King):
+                    move = self.an.get_king_algebraic_notation(start_square, end_square, is_capture)
+                                         
                 print(move)
                 if move in self.list_of_all_moves:
                     return move
@@ -159,8 +184,20 @@ class Board():
                     reutrn = True
         return False
                     
-    def make_move(self):
-        pass
+    def make_move(self, start_square, destination_square):
+        piece = self.return_piece_on_square(start_square)
+        piece.x = destination_square[0]
+        piece.y = destination_square[1]
+        self.board[destination_square[1]][destination_square[0]] = piece
+        
+        piece_on_destination_square = self.return_piece_on_square(destination_square)
+        if piece_on_destination_square is None:
+            self.board[piece_on_destination_square.x][piece_on_destination_square.y] = None
+            for piece in self.pieces_on_board:
+               if piece == piece_on_destination_square:
+                   self.pieces_on_board.remove(piece)
+                   
+        self.color_to_move = self.BLACK if self.color_to_move == self.WHITE else self.WHITE
         
     def parse_fen(self):
         
@@ -174,9 +211,9 @@ class Board():
         split_fen = self.fen.split(" ")
         self.parse_ranks_on_fen(split_fen[0])
         
-        # white_to_move is set to True on init, so we only need to check if it's black move
+        # color_to_move is set to True on init, so we only need to check if it's black move
         if split_fen[1] == "b":
-            self.white_to_move = False
+            self.color_to_move = self.BLACK
         
         self.parse_castling_on_fen(split_fen[2])
         self.en_passant_target_square = split_fen[3]
@@ -190,68 +227,68 @@ class Board():
             else:
                 for y in range(int(ranks[x])):
                     piece_positions.append("0")
-    
+
         for y in range(self.LENGTH):
             for x in range(self.LENGTH):
                 index = (y * self.LENGTH) + x
                 if piece_positions[index].lower() == "p":
                     if piece_positions[index].isupper():
                         pawn = Pawn(x, y, self.WHITE, filename="wP")
-                        self.board[x][y] = pawn
+                        self.board[y][x] = pawn
                         self.pieces_on_board.append(pawn)
                     else:
                         pawn = Pawn(x, y, self.BLACK, filename="bP")
-                        self.board[x][y] = pawn
+                        self.board[y][x] = pawn
                         self.pieces_on_board.append(pawn)
                 elif piece_positions[index].lower() == "n":
                     if piece_positions[index].isupper():
                         knight = Knight(x, y, self.WHITE, filename="wN")
-                        self.board[x][y] = knight
+                        self.board[y][x] = knight
                         self.pieces_on_board.append(knight)
                     else:
                         knight = Knight(x, y, self.BLACK, filename="bN")
-                        self.board[x][y] = knight
+                        self.board[y][x] = knight
                         self.pieces_on_board.append(knight)
                 elif piece_positions[index].lower() == "b":
                     if piece_positions[index].isupper():
                         bishop = Bishop(x, y, self.WHITE, filename="wB")
-                        self.board[x][y] = bishop
+                        self.board[y][x] = bishop
                         self.pieces_on_board.append(bishop)
                     else:
                         bishop = Bishop(x, y, self.BLACK, filename="bB")
-                        self.board[x][y] = bishop
+                        self.board[y][x] = bishop
                         self.pieces_on_board.append(bishop)
                 elif piece_positions[index].lower() == "q":
                     if piece_positions[index].isupper():
                         queen = Queen(x, y, self.WHITE, filename="wQ")
-                        self.board[x][y] = queen
+                        self.board[y][x] = queen
                         self.pieces_on_board.append(queen)
                     else:
                         queen = Queen(x, y, self.BLACK, filename="bQ")
-                        self.board[x][y] = queen
+                        self.board[y][x] = queen
                         self.pieces_on_board.append(queen)
                 elif piece_positions[index].lower() == "k":
                     if piece_positions[index].isupper():
                         king = King(x, y, self.WHITE, filename="wK")
-                        self.board[x][y] = king
+                        self.board[y][x] = king
                         self.pieces_on_board.append(king)
                     else:
                         king = King(x, y, self.BLACK, filename="bK")
-                        self.board[x][y] = king
+                        self.board[y][x] = king
                         self.pieces_on_board.append(king)
                 elif piece_positions[index].lower() == "r":
                     if piece_positions[index].isupper():
                         rook = Rook(x, y, self.WHITE, filename="wR")
-                        self.board[x][y] = rook
+                        self.board[y][x] = rook
                         self.pieces_on_board.append(rook)
                     else:
                         rook = Rook(x, y, self.BLACK, filename="bR")
-                        self.board[x][y] = rook
+                        self.board[y][x] = rook
                         self.pieces_on_board.append(rook)      
                                   
             
     def parse_castling_on_fen(self, castling_rights):
-        kings = [self.board[x][y] for x in range(self.LENGTH) for y in range(self.LENGTH) if isinstance(self.board[x][y], King)]
+        kings = [self.board[y][x] for x in range(self.LENGTH) for y in range(self.LENGTH) if isinstance(self.board[y][x], King)]
         for king in kings:
             if king.color == self.WHITE and "K" not in castling_rights:
                 king.can_castle_kingside = False
