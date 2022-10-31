@@ -8,6 +8,7 @@ from piece.Pawn import Pawn
 from piece.Queen import Queen
 from piece.Rook import Rook
 from board.AlgebraicNotation import AlgebraicNotation
+from iteration_utilities import duplicates
 
 class Board():
     
@@ -125,17 +126,83 @@ class Board():
     
     def get_piece_moves(self):
         self.list_of_all_moves = []
+        duplicate_move_to_fixed_dict = {}
+        
         for piece in self.pieces_on_board:
             if piece.color == self.color_to_move:
                 moves = piece.get_moves(self.board)
                 if moves:
                     for move in moves:
                         self.list_of_all_moves.append(move)
-        print(self.list_of_all_moves)
-            
-    def check_user_move(self, start_square, end_square):
-        #TODO: implement... there is much more to this than I thought lol
+                        
+        move_duplicates = list(duplicates(self.list_of_all_moves))
+        #print(f"duplicates: {move_duplicates}")
+
+        for move in self.list_of_all_moves:
+            if move in move_duplicates:
+                self.list_of_all_moves.remove(move) 
         
+        fixed_move_duplicates = self.parse_duplicate_moves(move_duplicates)
+        self.list_of_all_moves.extend(fixed_move_duplicates)
+        #print(f"moves: {self.list_of_all_moves}")
+        
+        for move in move_duplicates:
+            duplicate_move_to_fixed_dict[move] = [x for x in fixed_move_duplicates if move[0] == x[0] and move[-1] == x[-1] and move[-2] == x[-2]]
+            
+        for piece in self.pieces_on_board:
+            for move in duplicate_move_to_fixed_dict:
+                if move in piece.moves:
+                    piece.moves.remove(move)
+                    piece.moves.extend(duplicate_move_to_fixed_dict[move])
+        
+        print(duplicate_move_to_fixed_dict)
+
+    def parse_duplicate_moves(self, duplicate_moves):
+        changed_moves = []
+        
+        for move in duplicate_moves:
+            piece_letter = move[0]
+            for piece in self.pieces_on_board:
+                if isinstance(piece, Rook) and piece.color == self.color_to_move and piece_letter == 'R':
+                    if self.is_piece_on_same_file(piece, Rook):
+                        changed_moves.append(move[0] + str(self.an.get_file_number(piece.y)) + move[1:])
+                    elif self.is_piece_on_same_rank(piece, Rook):
+                        changed_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
+                elif isinstance(piece, Queen) and piece.color == self.color_to_move and piece_letter == 'Q':
+                    if self.is_piece_on_same_file(piece, Queen):
+                        changed_moves.append(move[0] + str(self.an.get_file_number(piece.y)) + move[1:])
+                    else:
+                        changed_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
+                elif isinstance(piece, Knight) and piece.color == self.color_to_move and piece_letter == 'N':
+                    changed_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
+                elif isinstance(piece, Bishop) and piece.color == self.color_to_move and piece_letter == 'B':
+                    changed_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
+                    
+        return changed_moves       
+
+                                
+    def is_piece_on_same_file(self, piece, piece_class):
+        for y in range(self.LENGTH):
+            if y == piece.y:
+                continue
+            square_on_file = self.board[y][piece.x]
+            if isinstance(square_on_file, piece_class) and square_on_file.color == piece.color:
+                    return True
+        return False
+    
+    def is_piece_on_same_rank(self, piece, piece_class):
+        for x in range(self.LENGTH):
+            if x == piece.x:
+                continue
+            square_on_rank = self.board[piece.y][x]
+            if isinstance(square_on_rank, piece_class) and isinstance(piece, piece_class) and square_on_rank.color == piece.color:
+                    return True
+        return False
+
+            
+    def check_user_move(self, start_square, end_square): 
+        alternate_moves = []
+              
         piece = self.board[start_square[1]][start_square[0]]
         destination = self.board[end_square[1]][end_square[0]]
         #if the user selected a square with a piece
@@ -149,53 +216,47 @@ class Board():
                 if isinstance(piece, Pawn):
                     move = self.an.get_pawn_algebraic_notation(start_square, end_square, is_capture)
                 elif isinstance(piece, Knight):
-                    move = self.an.get_knight_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                    move = self.an.get_knight_algebraic_notation(start_square, end_square, is_capture)
+                    alternate_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
                 elif isinstance(piece, Bishop):
-                    move = self.an.get_bishop_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                    move = self.an.get_bishop_algebraic_notation(start_square, end_square, is_capture)
+                    alternate_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
                 elif isinstance(piece, Queen):
-                    move = self.an.get_queen_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                    move = self.an.get_queen_algebraic_notation(start_square, end_square, is_capture)
+                    alternate_moves.append(move[0] + str(self.an.get_file_number(piece.y)) + move[1:])
+                    alternate_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
                 elif isinstance(piece, Rook):
-                    move = self.an.get_rook_algebraic_notation(start_square, end_square, is_capture, is_same_piece_on_rank, is_same_piece_on_file)
+                    move = self.an.get_rook_algebraic_notation(start_square, end_square, is_capture)
+                    alternate_moves.append(move[0] + str(self.an.get_file_number(piece.y)) + move[1:])
+                    alternate_moves.append(move[0] + str(self.an.get_rank_letter(piece.x)) + move[1:])
                 elif isinstance(piece, King):
                     move = self.an.get_king_algebraic_notation(start_square, end_square, is_capture)
                                          
-                print(move)
-                if move in self.list_of_all_moves:
+                if move in piece.moves:
                     return move
+                else:
+                    for alterate_move in alternate_moves:
+                        if alterate_move in piece.moves:
+                            return alterate_move
                 return None
-            
-    def is_piece_on_same_file(self, piece):
-        for y in range(self.LENGTH):
-            if y == piece.y:
-                continue
-            square_on_file = self.board[piece.x][y]
-            if type(square_on_file) == type(piece):
-                if square_on_file.color == piece.color:
-                    reutrn = True
-        return False
-    
-    def is_piece_on_same_rank(self, piece):
-        for x in range(self.LENGTH):
-            if x == piece.x:
-                continue
-            square_on_rank = self.board[x][piece.y]
-            if type(square_on_rank) == type(piece):
-                if square_on_rank.color == piece.color:
-                    reutrn = True
-        return False
                     
     def make_move(self, start_square, destination_square):
-        piece = self.return_piece_on_square(start_square)
-        piece.x = destination_square[0]
-        piece.y = destination_square[1]
-        self.board[destination_square[1]][destination_square[0]] = piece
-        
         piece_on_destination_square = self.return_piece_on_square(destination_square)
-        if piece_on_destination_square is None:
-            self.board[piece_on_destination_square.x][piece_on_destination_square.y] = None
+        piece_on_start_square = self.return_piece_on_square(start_square)
+
+        if self.board[destination_square[1]][destination_square[0]] is not None:
+            self.board[destination_square[1]][destination_square[0]] = piece_on_start_square
+            self.board[start_square[1]][start_square[0]] = None
             for piece in self.pieces_on_board:
-               if piece == piece_on_destination_square:
-                   self.pieces_on_board.remove(piece)
+                if piece == piece_on_destination_square:
+                    self.pieces_on_board.remove(piece)
+        else:
+            self.board[destination_square[1]][destination_square[0]] = piece_on_start_square
+            self.board[start_square[1]][start_square[0]] = None
+            
+
+        piece_on_start_square.x = destination_square[0]
+        piece_on_start_square.y = destination_square[1]
                    
         self.color_to_move = self.BLACK if self.color_to_move == self.WHITE else self.WHITE
         
