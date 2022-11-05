@@ -14,7 +14,7 @@ class Rook(Piece):
         self.moves = []
         self.moves_no_algebraic_notation = []
         
-    def get_moves(self, board):
+    def calculate_moves(self, board):
         self.moves.clear()
         self.moves_no_algebraic_notation.clear()
         current_position = (self.x, self.y)
@@ -67,6 +67,10 @@ class Rook(Piece):
                 break
             elif board[move[1]][move[0]].color == self.color:
                 break
-            
+                
+    def get_moves_no_algebraic_notation(self):
+        return self.moves_no_algebraic_notation
+    
+    def get_moves(self):
         return self.moves
             

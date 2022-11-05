@@ -18,7 +18,7 @@ class Pawn(Piece):
         self.moves_no_algebraic_notation = []
 
         
-    def get_moves(self, board):
+    def calculate_moves(self, board):
         self.moves = []
         self.moves_no_algebraic_notation = []
         current_position = (self.x, self.y)
@@ -63,7 +63,9 @@ class Pawn(Piece):
                 if board[fourth_possible_move[1]][fourth_possible_move[0]] is not None and board[fourth_possible_move[1]][fourth_possible_move[0]].color != self.BLACK:
                     self.moves.append(self.an.get_pawn_algebraic_notation(current_position, fourth_possible_move, True))
                     self.moves_no_algebraic_notation.append(fourth_possible_move)  
-                    
+                        
+    def get_moves_no_algebraic_notation(self):
+        return self.moves_no_algebraic_notation
+        
+    def get_moves(self):
         return self.moves
-        
-        

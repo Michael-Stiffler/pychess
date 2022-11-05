@@ -14,14 +14,12 @@ class Queen(Piece):
         self.moves = []
         self.moves_no_algebraic_notation = []
         
-    def get_moves(self, board):
+    def calculate_moves(self, board):
         self.moves = []
         self.moves_no_algebraic_notation = []
 
         self.get_rook_moves(board)
         self.get_bishop_moves(board)
-        
-        return self.moves
     
     def get_bishop_moves(self, board):
         current_position = (self.x, self.y)
@@ -106,5 +104,11 @@ class Queen(Piece):
                 break
             elif board[move[1]][move[0]].color == self.color:
                 break
+    
+    def get_moves_no_algebraic_notation(self):
+        return self.moves_no_algebraic_notation
+    
+    def get_moves(self):
+        return self.moves
         
         

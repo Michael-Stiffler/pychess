@@ -51,6 +51,12 @@ class AlgebraicNotation():
             return f"K{self.get_rank_letter(end[0])}{self.get_file_number(end[1])}"
         else:
             return f"Kx{self.get_rank_letter(end[0])}{self.get_file_number(end[1])}"
+        
+    def get_king_castle_notation(self, kingside):
+        if kingside:
+            return f"O-O"
+        else:
+            return f"O-O-O"
     
     def get_rank_letter(self, num):
         return self.ranks[num]

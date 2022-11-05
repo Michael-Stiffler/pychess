@@ -14,7 +14,7 @@ class Knight(Piece):
         self.moves = []
         self.moves_no_algebraic_notation = []
         
-    def get_moves(self, board):
+    def calculate_moves(self, board):
         self.moves = []
         self.moves_no_algebraic_notation = []
         current_position = (self.x, self.y)
@@ -30,5 +30,9 @@ class Knight(Piece):
                 elif board[move[1]][move[0]].color != self.color:
                     self.moves.append(self.an.get_knight_algebraic_notation(current_position, move, True))
                     self.moves_no_algebraic_notation.append(move)
-                
+                    
+    def get_moves_no_algebraic_notation(self):
+        return self.moves_no_algebraic_notation
+    
+    def get_moves(self):
         return self.moves

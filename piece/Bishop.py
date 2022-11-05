@@ -14,7 +14,7 @@ class Bishop(Piece):
         self.moves = []
         self.moves_no_algebraic_notation = []
         
-    def get_moves(self, board):
+    def calculate_moves(self, board):
         self.moves = []
         self.moves_no_algebraic_notation = []
         current_position = (self.x, self.y)
@@ -46,6 +46,10 @@ class Bishop(Piece):
                         diagonal[1] += 1
                     else:
                         diagonal[1] -= 1 
-                                
+                                    
+    def get_moves_no_algebraic_notation(self):
+        return self.moves_no_algebraic_notation
+        
+    def get_moves(self):
         return self.moves
             

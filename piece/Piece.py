@@ -13,7 +13,12 @@ class Piece():
     def get_moves(self):
         pass
     
-    def make_move():
+    @abstractmethod
+    def get_moves_no_algebraic_notation(self):
+        pass
+    
+    @abstractmethod
+    def calculate_moves(self):
         pass
     
     def promote_to_queen():
