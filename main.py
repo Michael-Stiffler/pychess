@@ -32,9 +32,9 @@ def main():
             with cProfile.Profile() as pr:
                 board.get_piece_moves() 
                 
-            # stats = pstats.Stats(pr)
-            # stats.sort_stats(pstats.SortKey.TIME)
-            # stats.print_stats()  
+            stats = pstats.Stats(pr)
+            stats.sort_stats(pstats.SortKey.TIME)
+            stats.print_stats()  
             need_to_calculate_moves = False   
         
         
@@ -50,7 +50,7 @@ def main():
             elif event.type == py.MOUSEBUTTONDOWN:
                 square_pos_on_mouse_down = board.get_square_from_mouse_pos(mouse_pos)
                 print(square_pos_on_mouse_down) 
-                piece = board.return_piece_on_square(square_pos_on_mouse_down)
+                piece = board.return_piece_on_square(board.get_board(), square_pos_on_mouse_down)
                 if piece and piece.color == board.color_to_move:
                     board.piece_held = piece
                     holding_piece = True

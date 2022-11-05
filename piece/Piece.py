@@ -21,6 +21,10 @@ class Piece():
     def calculate_moves(self):
         pass
     
+    @abstractmethod
+    def reset_moves(self):
+        pass
+    
     def promote_to_queen():
         pass
     

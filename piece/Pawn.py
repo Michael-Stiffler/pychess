@@ -69,3 +69,7 @@ class Pawn(Piece):
         
     def get_moves(self):
         return self.moves
+    
+    def reset_moves(self):
+        self.moves = []
+        self.moves_no_algebraic_notation = []

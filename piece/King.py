@@ -85,5 +85,12 @@ class King(Piece):
     def get_moves(self):
         return self.moves
     
+    def reset_moves(self):
+        self.moves = []
+    
     def set_attack_squares(self, list_of_attack_squares):
         self.list_of_enemy_attack_squares = list_of_attack_squares
+        
+    def reset_moves(self):
+        self.moves = []
+        self.moves_no_algebraic_notation = []
