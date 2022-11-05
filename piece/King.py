@@ -26,16 +26,16 @@ class King(Piece):
         #TODO: have to look if I am walking in a check :(
         if self.can_castle_kingside:
             if self.color == self.WHITE:
-                if current_position == (4,7):
-                    if board[7][5] is None and board[7][6] is None and isinstance(board[7][7], Rook):
+                if current_position == (4,7) and isinstance(board[7][7], Rook):
+                    if board[7][5] is None and board[7][6] is None:
                         if (5,7) not in self.list_of_enemy_attack_squares and (6,7) not in self.list_of_enemy_attack_squares:
                             self.moves.append(self.an.get_king_castle_notation(True))
                             self.moves_no_algebraic_notation.append((6,7))
                 else:
                     self.can_castle_kingside = False
             elif self.color == self.BLACK:
-                if current_position == (4,0):
-                    if board[0][5] is None and board[0][6] is None and isinstance(board[0][7], Rook):
+                if current_position == (4,0) and isinstance(board[0][7], Rook):
+                    if board[0][5] is None and board[0][6] is None:
                         if (5,0) not in self.list_of_enemy_attack_squares and (6,0) not in self.list_of_enemy_attack_squares:
                             self.moves.append(self.an.get_king_castle_notation(True))
                             self.moves_no_algebraic_notation.append((6,0))
@@ -43,16 +43,16 @@ class King(Piece):
                     self.can_castle_kingside = False
         if self.can_castle_queenside:
             if self.color == self.WHITE:
-                if current_position == (4,7):
-                    if board[7][3] is None and board[7][2] is None and board[7][1] is None and isinstance(board[7][0], Rook):
+                if current_position == (4,7) and isinstance(board[7][0], Rook):
+                    if board[7][3] is None and board[7][2] is None and board[7][1] is None:
                         if (3,7) not in self.list_of_enemy_attack_squares and (2,7) not in self.list_of_enemy_attack_squares:
                             self.moves.append(self.an.get_king_castle_notation(False))
                             self.moves_no_algebraic_notation.append((2,7))
                 else:
                     self.can_castle_queenside = False
             elif self.color == self.BLACK:
-                if current_position == (4,0):
-                    if board[0][3] is None and board[0][2] is None and board[0][1] is None and isinstance(board[0][0], Rook):
+                if current_position == (4,0) and isinstance(board[0][0], Rook):
+                    if board[0][3] is None and board[0][2] is None and board[0][1] is None:
                         if (3,0) not in self.list_of_enemy_attack_squares and (2,0) not in self.list_of_enemy_attack_squares:
                             self.moves.append(self.an.get_king_castle_notation(False))
                             self.moves_no_algebraic_notation.append((2,0))
