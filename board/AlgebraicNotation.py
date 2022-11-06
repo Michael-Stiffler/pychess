@@ -5,7 +5,6 @@ class AlgebraicNotation():
         self.ranks = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         
     def get_pawn_algebraic_notation(self, start, end, is_capture):
-        #TODO EN PASSANT
         
         if not is_capture:
             return f"{self.get_rank_letter(end[0])}{self.get_file_number(end[1])}"
@@ -56,6 +55,16 @@ class AlgebraicNotation():
     
     def get_square_from_algebraic_notation(self, move):
         square = move[-2:]
-        return (self.ranks.index(square[0]), self.files[(-int(square[1]))]  - 1)
+        return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1)
 
-    
+    def get_castle_square_from_algebraic_notation(self, move, piece):
+        if move == "O-O":
+            if piece.color == 0:
+                return (6,7)
+            else:
+                return (6,0)
+        else:
+            if piece.color == 0:
+                return (2,7)
+            else:
+                return (2,0)

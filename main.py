@@ -32,9 +32,9 @@ def main():
             with cProfile.Profile() as pr:
                 board.get_piece_moves() 
                 
-            stats = pstats.Stats(pr)
-            stats.sort_stats(pstats.SortKey.TIME)
-            stats.print_stats()  
+            #stats = pstats.Stats(pr)
+            #stats.sort_stats(pstats.SortKey.TIME)
+            #stats.print_stats()  
             need_to_calculate_moves = False   
         
         

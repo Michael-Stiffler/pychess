@@ -14,7 +14,6 @@ class King(Piece):
         self.an = AlgebraicNotation()
         self.moves = []
         self.moves_no_algebraic_notation = []
-        self.list_of_enemy_attack_squares = []
         self.can_castle_kingside = True
         self.can_castle_queenside = True
         
@@ -65,10 +64,6 @@ class King(Piece):
                 if x == 0 and y == 0:
                     continue
                 move = (self.x+x, self.y+y)
-                
-                if move in self.list_of_enemy_attack_squares:
-                    continue
-                
                 if move[0] >= 0 and move[0] <= 7 and move[1] >= 0 and move[1] <= 7:
                     if board[move[1]][move[0]] is None:
                         self.moves.append(self.an.get_king_algebraic_notation(current_position, move, False))
@@ -87,9 +82,6 @@ class King(Piece):
     
     def reset_moves(self):
         self.moves = []
-    
-    def set_attack_squares(self, list_of_attack_squares):
-        self.list_of_enemy_attack_squares = list_of_attack_squares
         
     def reset_moves(self):
         self.moves = []
