@@ -24,18 +24,6 @@ class Piece():
     @abstractmethod
     def reset_moves(self):
         pass
-    
-    def promote_to_queen():
-        pass
-    
-    def promote_to_rook():
-        pass
-    
-    def promote_to_bishop():
-        pass
-    
-    def promote_to_knight():
-        pass
 
 
         

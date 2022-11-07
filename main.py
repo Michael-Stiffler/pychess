@@ -13,10 +13,11 @@ def main():
     holding_piece = False
     clock = py.time.Clock()
     #board = Board(display=py.display.set_mode((800, 800)), fen='2r3r1/4N3/RN6/8/8/7Q/R7/5Q2 w - - 0 1')
-    board = Board(display=py.display.set_mode((800, 800)),  fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    #board = Board(display=py.display.set_mode((800, 800)),  fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     #board = Board(display=py.display.set_mode((800, 800)),  fen='2kr3r/p1ppqpb1/bn2Qnp1/3PN3/1p2P3/2N5/PPPBBPPP/R3K2R b KQ - 3 2')
     #board = Board(display=py.display.set_mode((800, 800)), fen='rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9')
     #board = Board(display=py.display.set_mode((800, 800)), fen='r1bqkb1r/pp1ppppp/2p2n2/5n2/P1B2N2/4PN2/1PPP1PPP/R1BQK2R w kq - 1 10')
+    board = Board(display=py.display.set_mode((800, 800)), fen='5k2/2p2b2/8/3P4/2K5/8/8/8 b - - 0 1')
 
     board.parse_fen()
     board.load_pieces()
@@ -37,7 +38,6 @@ def main():
             #stats.print_stats()  
             need_to_calculate_moves = False   
         
-        
         if holding_piece:
             board.draw_board()
             board.draw_moves()
@@ -50,7 +50,7 @@ def main():
             elif event.type == py.MOUSEBUTTONDOWN:
                 square_pos_on_mouse_down = board.get_square_from_mouse_pos(mouse_pos)
                 print(square_pos_on_mouse_down) 
-                piece = board.return_piece_on_square(board.get_board(), square_pos_on_mouse_down)
+                piece = board.return_piece_on_square(square_pos_on_mouse_down)
                 if piece and piece.color == board.color_to_move:
                     board.piece_held = piece
                     holding_piece = True
@@ -60,7 +60,8 @@ def main():
                 if square_pos_on_mouse_down != square_pos_on_mouse_up:
                     move = board.check_user_move(square_pos_on_mouse_down, square_pos_on_mouse_up)
                     if move:
-                        board.make_move(square_pos_on_mouse_down, square_pos_on_mouse_up) 
+                        piece = board.return_piece_on_square(square_pos_on_mouse_down)
+                        board.make_move(move, piece) 
                         need_to_calculate_moves = True    
                 board.draw_board()
                 board.draw_pieces()
