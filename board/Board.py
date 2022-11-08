@@ -27,6 +27,7 @@ class Board():
         self.list_of_all_moves = []
         self.list_of_enemy_attack_moves = []
         self.color_to_move = self.WHITE
+        self.en_passant_possible = False
         self.en_passant_target_square = ""
         self.en_passant_destination_square = None
         self.copy_of_en_passant_target_square = ""
@@ -139,17 +140,25 @@ class Board():
         
     def get_check_moves(self, board, pieces_on_board):
         self.list_of_enemy_attack_moves = []
+        not_attack_moves = []
         self.color_to_move = self.BLACK if self.color_to_move == self.WHITE else self.WHITE
         for piece in pieces_on_board:
             if piece.color == self.color_to_move:
                 if isinstance(piece, Pawn):
-                    piece.calculate_moves(board, self.copy_of_en_passant_target_square)
+                    if self.en_passant_possible:
+                        piece.calculate_moves(board, self.copy_of_en_passant_target_square)
+                    else:
+                        piece.calculate_moves(board)
+                    not_attack_moves = piece.get_not_attack_moves()
+                    self.en_passant_possible = False
                 else:
                     piece.calculate_moves(board)
+                    
                 moves = piece.get_moves_no_algebraic_notation()
                 if moves:
                     for move in moves:
-                        self.list_of_enemy_attack_moves.append(move)
+                        if move not in not_attack_moves:
+                            self.list_of_enemy_attack_moves.append(move)
         self.color_to_move = self.BLACK if self.color_to_move == self.WHITE else self.WHITE
 
     def king_in_check(self, board):
@@ -164,12 +173,17 @@ class Board():
         not_legal_moves_an = []
         
         if isinstance(piece, Pawn):
-            piece.calculate_moves(self.board, self.en_passant_target_square)
+            if self.en_passant_possible:
+                piece.calculate_moves(self.board, self.en_passant_target_square)
+            else:
+                piece.calculate_moves(self.board)
+            self.en_passant_possible = False
         else:
             piece.calculate_moves(self.board)
             
         moves = piece.get_moves()
-                
+        print(moves)
+
         for move in moves:
             self.copy_of_board = pickle.loads(pickle.dumps(self.board, -1))
             self.copy_of_pieces_on_board = pickle.loads(pickle.dumps(self.pieces_on_board, -1))
@@ -184,10 +198,8 @@ class Board():
             else:
                 not_legal_moves.append(move)
                 not_legal_moves_an.append(self.an.get_square_from_algebraic_notation(move))
-                
         piece.moves = list(set(piece.get_moves())-set(not_legal_moves))
         piece.moves_no_algebraic_notation = list(set(piece.get_moves_no_algebraic_notation())-set(not_legal_moves_an))
-            
         return legal_moves
         
     def get_piece_moves(self):
@@ -203,7 +215,10 @@ class Board():
                         self.list_of_all_moves.append(move)
                                                 
         if len(self.list_of_all_moves) == 0:
-            print("checkmate!")
+            if self.king_in_check(self.board):
+                print("checkmate!")
+            else:
+                print("stalemate!")
             return
         
         move_duplicates = list(duplicates(self.list_of_all_moves))
@@ -282,10 +297,10 @@ class Board():
                 
                 if isinstance(piece, Pawn):
                     if self.an.get_pawn_algebraic_notation(start_square, end_square, False) == self.en_passant_target_square:
-                        print("here")
-                        print(self.an.get_pawn_algebraic_notation(start_square, end_square, False))
                         move = self.an.get_pawn_algebraic_notation(start_square, end_square, True)
                         self.is_enpassant = True
+                    elif (piece.y == 1 and piece.color == self.WHITE) or (piece.y == 6 and piece.color == self.BLACK):
+                        move = self.an.get_pawn_promotion_notation(start_square, end_square, is_capture)
                     else:
                         move = self.an.get_pawn_algebraic_notation(start_square, end_square, is_capture)
                 elif isinstance(piece, Knight):
@@ -324,7 +339,7 @@ class Board():
                             return alterate_move
                 return None
     
-    def make_pawn_move(self, piece, board, pieces_on_board, start_square, destination_square, piece_on_start_square, piece_on_destination_square, actual_move): 
+    def make_pawn_move(self, move, piece, board, pieces_on_board, start_square, destination_square, piece_on_start_square, piece_on_destination_square, actual_move): 
         # this is for setting the enpassant square
         if (self.is_enpassant and actual_move) or (self.copy_of_is_enpassant and not actual_move):
             board[destination_square[1]][destination_square[0]] = piece_on_start_square
@@ -356,7 +371,8 @@ class Board():
                     self.copy_of_en_passant_destination_square = destination_square
                 else:
                     self.en_passant_target_square = self.an.get_pawn_algebraic_notation(start_square, (start_square[0], start_square[1] - 1), False)
-                    self.en_passant_destination_square = destination_square  
+                    self.en_passant_destination_square = destination_square 
+                self.en_passant_possible = True 
         else:
             if start_square[1] + 2 == destination_square[1]:
                 if not actual_move:
@@ -365,6 +381,7 @@ class Board():
                 else:
                     self.en_passant_target_square = self.an.get_pawn_algebraic_notation(start_square, (start_square[0], start_square[1] + 1), False)
                     self.en_passant_destination_square = destination_square
+                self.en_passant_possible = True 
 
         if self.is_enpassant:
             self.is_enpassant = False
@@ -379,8 +396,8 @@ class Board():
         piece_on_start_square.x = destination_square[0]
         piece_on_start_square.y = destination_square[1]
         
-        if piece.color == self.BLACK and piece.y == 7 or piece.color == self.WHITE and piece.y == 0:
-            self.promote_to_queen(piece, board, pieces_on_board)   
+        if "=" in move:
+            self.promote_to_queen(piece_on_start_square, board, pieces_on_board)   
             
     
     def make_king_move(self, piece, board, pieces_on_board, start_square, destination_square, piece_on_start_square, piece_on_destination_square, actual_move):
@@ -452,14 +469,14 @@ class Board():
         piece_on_start_square = self.return_piece_on_square(start_square, board)
             
         if isinstance(piece, Pawn):
-            self.make_pawn_move(piece, board, pieces_on_board, start_square, destination_square, piece_on_start_square, piece_on_destination_square, actual_move)
+            self.make_pawn_move(move, piece, board, pieces_on_board, start_square, destination_square, piece_on_start_square, piece_on_destination_square, actual_move)
         elif isinstance(piece, King):
             self.make_king_move(piece, board, pieces_on_board, start_square, destination_square, piece_on_start_square, piece_on_destination_square, actual_move)
         else:   
             if board[destination_square[1]][destination_square[0]] is not None:
-                for piece in pieces_on_board:
-                    if piece.color == piece_on_destination_square.color and (piece.x, piece.y) == (piece_on_destination_square.x, piece_on_destination_square.y):
-                        pieces_on_board.remove(piece)
+                for same_piece in pieces_on_board:
+                    if same_piece.color == piece_on_destination_square.color and (same_piece.x, same_piece.y) == (piece_on_destination_square.x, piece_on_destination_square.y):
+                        pieces_on_board.remove(same_piece)
                         break
                 board[destination_square[1]][destination_square[0]] = piece_on_start_square
                 board[start_square[1]][start_square[0]] = None
@@ -577,9 +594,10 @@ class Board():
         board[piece.y][piece.x] = Queen(piece.x, piece.y, self.WHITE, filename="wQ") if piece.color == self.WHITE else Queen(piece.x, piece.y, self.BLACK, filename="bQ")
         for same_piece in pieces_on_board:
             if piece.color == same_piece.color and (piece.x, piece.y) == (same_piece.x, same_piece.y):
-                pieces_on_board.remove(piece)
+                pieces_on_board.remove(same_piece)
                 pieces_on_board.append(board[piece.y][piece.x])
                 break
+
         
     def promote_to_rook(self, piece):
         pass
