@@ -1,7 +1,7 @@
 import sys
 import pygame as py
 from board.Board import Board
-
+from board.Engine import Engine
 import cProfile
 import pstats
 
@@ -18,6 +18,7 @@ def main():
     #board = Board(display=py.display.set_mode((800, 800)), fen='rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9')
     #board = Board(display=py.display.set_mode((800, 800)), fen='r1bqkb1r/pp1ppppp/2p2n2/5n2/P1B2N2/4PN2/1PPP1PPP/R1BQK2R w kq - 1 10')
     board = Board(display=py.display.set_mode((800, 800)), fen='5k2/2p2b2/8/3P4/2K5/8/8/8 b - - 0 1')
+    engine = Engine()
 
     board.parse_fen()
     board.load_pieces()
