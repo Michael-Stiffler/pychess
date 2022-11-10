@@ -1,3 +1,10 @@
 class Engine():
     
-    pass
+    def __init__(self):
+        pass
+
+    def evaluate_position(self):
+        pass
+    
+    def determine_material(self):
+        pass
