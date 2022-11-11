@@ -1,7 +1,7 @@
 import sys
 import pygame as py
 from board.Board import Board
-from board.Engine import Engine
+from engine.Engine import Engine
 import cProfile
 import pstats
 
