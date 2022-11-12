@@ -57,6 +57,24 @@ class Board():
     def get_board(self):
         return self.board
 
+    def get_copy_board(self):
+        return self.copy_of_board
+    
+    def set_copy_board(self, board):
+        self.copy_of_board = board
+        
+    def get_copy_pieces_on_board(self):
+        return self.copy_of_pieces_on_board
+    
+    def set_copy_pieces_on_board(self, pieces_on_board):
+        self.copy_of_pieces_on_board = pieces_on_board
+    
+    def get_moves(self):
+        return self.list_of_all_moves
+    
+    def get_pieces_on_board(self):
+        return self.pieces_on_board
+        
     def draw_board(self):
     
         count = 0
@@ -206,7 +224,7 @@ class Board():
         self.list_of_all_moves = []
         self.list_of_enemy_attack_moves = []
         duplicate_move_to_fixed_dict = {}
-    
+
         for piece in self.pieces_on_board:
             if piece.color == self.color_to_move:
                 moves = self.check_legal_moves(piece)

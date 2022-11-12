@@ -4,10 +4,16 @@ from board.Board import Board
 from engine.Engine import Engine
 import cProfile
 import pstats
+import os 
+import sys
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.abspath(os.path.join(dir_path, os.pardir)))
+
+from board.AlgebraicNotation import AlgebraicNotation
 
 def main():
     py.init()
-
     running = True
     need_to_calculate_moves = True
     holding_piece = False
@@ -18,7 +24,8 @@ def main():
     #board = Board(display=py.display.set_mode((800, 800)), fen='rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9')
     #board = Board(display=py.display.set_mode((800, 800)), fen='r1bqkb1r/pp1ppppp/2p2n2/5n2/P1B2N2/4PN2/1PPP1PPP/R1BQK2R w kq - 1 10')
     board = Board(display=py.display.set_mode((800, 800)), fen='5k2/2p2b2/8/3P4/2K5/8/8/8 b - - 0 1')
-    engine = Engine()
+    engine = Engine(board=board, depth=3)
+    an = AlgebraicNotation()
 
     board.parse_fen()
     board.load_pieces()
@@ -33,10 +40,17 @@ def main():
         if need_to_calculate_moves:
             with cProfile.Profile() as pr:
                 board.get_piece_moves() 
+                engine.set_position()
+                engine.set_moves()  
+                engine.set_pieces_on_board()
+                move = engine.find_best_move()
+                piece = board.return_piece_on_square(an.get_square_from_algebraic_notation(move))
+                board.make_move(move, piece)
                 
-            #stats = pstats.Stats(pr)
-            #stats.sort_stats(pstats.SortKey.TIME)
-            #stats.print_stats()  
+            stats = pstats.Stats(pr)
+            stats.sort_stats(pstats.SortKey.TIME)
+            stats.print_stats()  
+            
             need_to_calculate_moves = False   
         
         if holding_piece:
