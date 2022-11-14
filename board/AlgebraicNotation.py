@@ -77,3 +77,6 @@ class AlgebraicNotation():
                 return (2,7)
             else:
                 return (2,0)
+            
+    def encode(self):
+        return self.__dict__

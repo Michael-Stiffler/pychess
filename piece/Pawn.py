@@ -1,19 +1,23 @@
 import os
 import sys
 
-from piece.Piece import Piece
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.abspath(os.path.join(dir_path, os.pardir)))
 
 from board.AlgebraicNotation import AlgebraicNotation
 
-class Pawn(Piece):
+class Pawn():
     def __init__(self, x, y, color, filename):
-        super().__init__(x, y, color, filename)
         self.an = AlgebraicNotation()
         self.moves = []
         self.moves_no_algebraic_notation = []
         self.not_attack_moves = []
+        self.x = x
+        self.y = y
+        self.color = color
+        self.filename = filename
+        self.WHITE = 0
+        self.BLACK = 1
 
         
     def calculate_moves(self, board, enpassant_target_square = None):
@@ -121,3 +125,6 @@ class Pawn(Piece):
         
     def get_not_attack_moves(self):
         return self.not_attack_moves
+    
+    def encode(self):
+        return self.__dict__
