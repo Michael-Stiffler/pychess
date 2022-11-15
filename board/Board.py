@@ -184,7 +184,7 @@ class Board():
 
     def king_in_check(self, board):
         for attack_move in self.list_of_enemy_attack_moves:
-            if isinstance(board[attack_move[1]][attack_move[0]], King):
+            if isinstance(board[attack_move[1]][attack_move[0]], King) and board[attack_move[1]][attack_move[0]].color == self.color_to_move:
                 return True
         return False
         
@@ -223,29 +223,32 @@ class Board():
         piece.moves_no_algebraic_notation = list(set(piece.get_moves_no_algebraic_notation())-set(not_legal_moves_an))
         return legal_moves
     
-    def check_if_game_over(self, board, pieces_on_board):
+    def check_if_game_over(self, move, piece, board, pieces_on_board):
+        self.copy_of_board = pickle.loads(pickle.dumps(board, -1))
+        self.copy_of_pieces_on_board = pickle.loads(pickle.dumps(pieces_on_board, -1))
+        self.make_move(move, piece, board=self.copy_of_board, pieces_on_board=self.copy_of_pieces_on_board)
         moves = []
         self.switch_color_to_move()
-
+    
         for piece in pieces_on_board:
             if piece.color == self.color_to_move:
-                moves.extend(self.check_legal_moves(piece, board, pieces_on_board))
-                        
-        self.switch_color_to_move()
-        
+                moves.extend(self.check_legal_moves(piece, self.copy_of_board, self.copy_of_pieces_on_board))
+                                        
         if len(moves) == 0:
             if self.king_in_check(board):
                 return "checkmate"
             else:
                 return "stalemate"
+        if self.king_in_check(board):
+            return "in check"
         return ""
         
-    def get_piece_moves(self, board=None, pieces_on_board=None):
+    def get_piece_moves(self, board=None, pieces_on_board=None):        
         actual_move = False
         
         if board is None:
-            board = self.board
             actual_move = True
+            board = self.board
         
         if pieces_on_board is None:
             pieces_on_board = self.pieces_on_board
@@ -260,13 +263,31 @@ class Board():
                 if moves:
                     for move in moves:
                         self.list_of_all_moves.append(move)
-                                                
-        if len(self.list_of_all_moves) == 0:
-            if actual_move:
-                new_move = move + "#"
-                duplicate_move_to_fixed_dict[move] = new_move
-                self.list_of_all_moves.remove(move) 
-                self.list_of_all_moves.extend(new_move)
+                        game_over = self.check_if_game_over(move=move, piece=piece, board=board, pieces_on_board=pieces_on_board)
+                        self.switch_color_to_move()
+                        if game_over == "stalemate":
+                            new_move = move + "$"
+                            duplicate_move_to_fixed_dict[move] = new_move
+                            self.list_of_all_moves.remove(move) 
+                            self.list_of_all_moves.append(new_move) 
+                        elif game_over == "checkmate":
+                            new_move = move + "#"
+                            duplicate_move_to_fixed_dict[move] = new_move
+                            self.list_of_all_moves.remove(move) 
+                            self.list_of_all_moves.append(new_move)  
+                        elif game_over == "in check": 
+                            new_move = move + "+"
+                            duplicate_move_to_fixed_dict[move] = new_move
+                            self.list_of_all_moves.remove(move) 
+                            self.list_of_all_moves.append(new_move)    
+                                     
+                                                                                              
+        if len(self.list_of_all_moves) == 0 and actual_move:
+            if self.king_in_check(board):
+                print("Checkmate!")
+            else:
+                print("Stalemate!")
+            sys.exit()
                     
         move_duplicates = list(duplicates(self.list_of_all_moves))
         #print(f"duplicates: {move_duplicates}")
@@ -286,9 +307,9 @@ class Board():
             for move in duplicate_move_to_fixed_dict:
                 if move in piece.moves:
                     piece.moves.remove(move)
-                    piece.moves.extend(duplicate_move_to_fixed_dict[move])
+                    piece.moves.append(duplicate_move_to_fixed_dict[move])
                     
-        print(self.list_of_all_moves)
+        #print(self.list_of_all_moves)
                     
     def parse_duplicate_moves(self, duplicate_moves):
         changed_moves = []
@@ -377,7 +398,11 @@ class Board():
                         move = self.an.get_king_castle_notation(False)
                     else:
                         move = self.an.get_king_algebraic_notation(start_square, end_square, is_capture)
-                        
+                
+                alternate_moves.append(move + "$")
+                alternate_moves.append(move + "#")
+                alternate_moves.append(move + "+")        
+        
                 if move in piece.moves:
                     if move == "O-O" or move == "O-O-O":
                         self.move_is_castle = True
@@ -554,7 +579,6 @@ class Board():
             board[destination_square[1]][destination_square[0]].y = destination_square[1]
             
     def switch_color_to_move(self):
-        print("here")
         self.color_to_move = self.BLACK if self.color_to_move == self.WHITE else self.WHITE 
   
     def parse_fen(self):

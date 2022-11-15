@@ -59,7 +59,10 @@ class AlgebraicNotation():
         return self.files[-(num + 1)]
     
     def get_square_from_algebraic_notation(self, move):
-        if not move[-1].isalpha():
+        if move[-1] in "$#+":
+            square = move[-3:-1]
+            return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1) 
+        elif not move[-1].isalpha():
             square = move[-2:]
             return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1)
         else:

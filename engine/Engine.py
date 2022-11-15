@@ -1,10 +1,8 @@
-import json
 import pickle
 import os 
 import sys
 from engine.Node import Node
-import ujson
-import ast
+from multiprocessing import Pool
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -23,45 +21,48 @@ class Engine():
         self.board_obj = board
         self.an = AlgebraicNotation()
         self.root = None
+        self.children = []
     
     def set_position(self):
         self.current_board = self.board_obj.get_board()
-        
-    def set_moves(self):
-        self.moves_in_current_board = self.board_obj.get_moves()
     
     def set_pieces_on_board(self):
         self.pieces_on_board = self.board_obj.get_pieces_on_board()
         
+    def set_children(self, children):
+        self.children.extend(children)
+        
     def find_best_move(self):
         self.create_root_node()
-        count = 0
-        for x in range(self.depth):
-            new_children = []
+        for _ in range(self.depth):
             self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
-            for node in self.nodes_to_look_at:
-                self.board_obj.get_piece_moves(board=node.get_board(), pieces_on_board=node.get_pieces_on_board())
-                self.set_moves()
-                new_children.extend(self.create_children_nodes(node))
-                count +=1
-            self.nodes_to_look_at = new_children
-        print(count)
+            with Pool(5) as p:
+                p.map(self.process_current_child, self.nodes_to_look_at)
+            self.nodes_to_look_at = self.children
+            self.children = []
         self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
         move = self.root.get_children()[0].move
         for piece in self.pieces_on_board:
             if move in piece.get_moves():
                 return move, piece
+    
+    def process_current_child(self, node):
+        self.board_obj.get_piece_moves(board=node.get_board(), pieces_on_board=node.get_pieces_on_board())
+        moves = self.board_obj.get_moves()
+        self.set_children(self.create_children_nodes(node, moves))
        
     def create_root_node(self):
         self.root = Node(board=self.current_board, pieces_on_board=self.pieces_on_board)
-        children = self.create_children_nodes(self.root)
+        self.board_obj.get_piece_moves(board=self.root.board, pieces_on_board=self.root.pieces_on_board)
+        moves = self.board_obj.get_moves()
+        children = self.create_children_nodes(self.root, moves)
         self.root.set_children(children)
         self.nodes_to_look_at = children
         
-    def create_children_nodes(self, node):
+    def create_children_nodes(self, node, moves):
         children = []
         
-        for move in self.moves_in_current_board:
+        for move in moves:
             node_board = pickle.loads(pickle.dumps(node.get_board(), -1))
             node_pieces_on_board = pickle.loads(pickle.dumps(node.get_pieces_on_board(), -1))
             self.board_obj.set_copy_pieces_on_board(node_pieces_on_board)
@@ -77,5 +78,8 @@ class Engine():
                     break  
                   
         return children
+    
+    if __name__ == "__main__":
+        pass
 
 

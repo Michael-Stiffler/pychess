@@ -44,7 +44,6 @@ def main():
                 board.get_piece_moves() 
                 if not board.white_to_move():
                     engine.set_position()
-                    engine.set_moves()  
                     engine.set_pieces_on_board()
                     move, piece = engine.find_best_move()
                     board.make_move(move, piece)
