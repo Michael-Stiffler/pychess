@@ -72,7 +72,7 @@ def main():
                 print(square_pos_on_mouse_down) 
                 piece = board.return_piece_on_square(square_pos_on_mouse_down)
                 if piece and piece.color == user_color:
-                    board.piece_held = piece
+                    board.piece_held(piece) 
                     holding_piece = True
             elif event.type == py.MOUSEBUTTONUP:
                 square_pos_on_mouse_up = board.get_square_from_mouse_pos(mouse_pos)

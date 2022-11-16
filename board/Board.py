@@ -1,12 +1,11 @@
-import pygame as py
 import math
-import os
 from piece.Bishop import Bishop
 from piece.King import King
 from piece.Knight import Knight
 from piece.Pawn import Pawn
 from piece.Queen import Queen
 from piece.Rook import Rook
+import board.DrawBoard as db
 from board.AlgebraicNotation import AlgebraicNotation
 from iteration_utilities import duplicates
 import pickle
@@ -20,7 +19,6 @@ class Board():
         self.LENGTH = 8
         self.WHITE = 0
         self.BLACK = 1
-        self.IMAGES = {}
         
         #self explanatory
         self.pieces_on_board = []
@@ -33,28 +31,17 @@ class Board():
         self.en_passant_destination_square = None
         self.copy_of_en_passant_target_square = ""
         self.copy_of_en_passant_destination_square = None
-        self.current_user_square = None
         self.move_is_castle = False
         self.is_enpassant = False
         self.copy_of_is_enpassant = False
-        self.display = display       
         self.fen = fen 
         self.an = AlgebraicNotation()
-        self.piece_held = None
+        self.display = display
         
         #holds the board with all the squares and if there is a piece then an object is there, else it is NoneType
         self.board = [[None for i in range(self.LENGTH)] for j in range(self.LENGTH)]
         self.copy_of_board = [[None for i in range(self.LENGTH)] for j in range(self.LENGTH)]
         
-        #colors for black and white squares as well as the highlight color
-        self.whiteColor = (255, 255, 255, 255)
-        self.blackColor =  (205, 129, 70, 255)
-        self.highlight_color = (101, 67, 45, 140)
-        
-        #set a pygame surface object for a square on the board with alpha and keep that square
-        self.square_surface = py.Surface((100,100), py.SRCALPHA)      
-        self.square_surface_rect = self.square_surface.get_rect(topleft=(0,0))
-
     def get_board(self):
         return self.board
 
@@ -80,49 +67,28 @@ class Board():
         return True if self.color_to_move == self.WHITE else False
         
     def draw_board(self):
-        count = 0
-        for x in range(1, self.LENGTH + 1):
-            for y in range(1, self.LENGTH + 1):
-                if count % 2 == 0:
-                    py.draw.rect(self.display, self.whiteColor, [
-                                self.SIZE*y - self.SIZE, self.SIZE*x - self.SIZE, self.SIZE, self.SIZE])
-                else:
-                    py.draw.rect(self.display, self.blackColor, [
-                                self.SIZE*y - self.SIZE, self.SIZE*x - self.SIZE, self.SIZE, self.SIZE])
-                count += 1
-            count -= 1
+        db.draw_board(self.display)
                         
     def load_pieces(self):
-        pieces = ['bB', 'bK', 'bN', 'bP', 'bQ',
-                 'bR', 'wB', 'wK', 'wN', 'wP', 'wQ', 'wR']
-        for piece in pieces:
-            source_file_dir = os.path.dirname(os.path.abspath(os.getcwd()))
-            image_path = os.path.join(source_file_dir, "pychess\\piece_images\\" + piece + '.png')
-            self.IMAGES[piece] = py.transform.scale(py.image.load(image_path), (self.SIZE, self.SIZE))
+        db.load_pieces()
             
     def draw_pieces(self):
-        for x in range(self.LENGTH):
-            for y in range(self.LENGTH):
-                piece = self.board[x][y]
-                if piece:
-                    self.display.blit(self.IMAGES[piece.filename], py.Rect(piece.x*self.SIZE, piece.y*self.SIZE, self.SIZE, self.SIZE))
+        db.draw_pieces(self.board, self.display)
     
     def drag_piece(self, mouse_pos):
-        for x in range(self.LENGTH):
-            for y in range(self.LENGTH):
-                piece = self.board[x][y]
-                if piece == self.piece_held:
-                    continue
-                elif piece:
-                    self.display.blit(self.IMAGES[piece.filename], py.Rect(piece.x*self.SIZE, piece.y*self.SIZE, self.SIZE, self.SIZE))
-        self.display.blit(self.IMAGES[self.piece_held.filename], (mouse_pos[0] - 50, mouse_pos[1] - 50))
+        db.drag_piece(mouse_pos, self.board, self.display)
         
-
     def draw_moves(self):
-        moves = self.piece_held.moves_no_algebraic_notation
-        for move in moves:
-            py.draw.circle(self.display, self.highlight_color, [
-                                self.SIZE*(move[0] + 1) - (self.SIZE / 2), self.SIZE*(move[1] + 1) - (self.SIZE / 2)], 25)
+        db.draw_moves(self.display)
+        
+    def initialize_show_square(self):
+        db.initialize_show_square(self.display)
+        
+    def show_square(self, mouse_position):
+        db.show_square(mouse_position, self.display)
+        
+    def piece_held(self, piece_held):
+        db.piece_held = piece_held
                     
     def get_square_from_mouse_pos(self, mouse_pos):
         return (math.floor(mouse_pos[0] / self.SIZE), math.floor(mouse_pos[1] / self.SIZE))
@@ -130,34 +96,7 @@ class Board():
     def return_piece_on_square(self, square_coordinates, board = None):
         if board is None:
             board = self.board
-        return board[square_coordinates[1]][square_coordinates[0]]                       
-
-    def show_square(self, mouse_position):
-        # this is for debugging purposes
-        
-        #formatted user position. ie (0,1), (2,2), etc
-        square_postion_x, square_position_y = (math.floor(mouse_position[0] / self.SIZE), math.floor(mouse_position[1] / self.SIZE))
-        
-        #we want to check if the square the user is currently at is different than the last. 
-        #helps not run through this process
-        if self.current_user_square is None or self.current_user_square[0] != square_postion_x or self.current_user_square[1] != square_position_y:
-            
-            #draw the pieces and the board over what we have so it can reset each iteration
-            self.draw_board()
-            self.draw_pieces()
-            
-            #set the current_user_square to the one we just moved to
-            self.current_user_square = (square_postion_x, square_position_y)
-            #find and create the area around where the rectangle should be. ie (100,100), (300,400), etc.
-            rect = (self.SIZE*(square_postion_x + 1) - self.SIZE, self.SIZE*(square_position_y + 1) - self.SIZE, self.SIZE, self.SIZE)
-            
-            #change the current topleft of that rectange to those new values. draw that rectange with a color. blit it on screen.
-            self.square_surface_rect.topleft = (rect[0], rect[1])
-            self.display.blit(self.square_surface, self.square_surface_rect)  
-            
-    def initialize_show_square(self):
-        py.draw.rect(self.square_surface, self.highlight_color, self.square_surface_rect)
-        self.display.blit(self.square_surface, self.square_surface_rect) 
+        return board[square_coordinates[1]][square_coordinates[0]]                        
         
     def get_check_moves(self, board, pieces_on_board):
         self.list_of_enemy_attack_moves = []
