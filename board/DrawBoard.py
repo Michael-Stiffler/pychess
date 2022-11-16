@@ -1,0 +1,2 @@
+class DrawBoard():
+    pass
