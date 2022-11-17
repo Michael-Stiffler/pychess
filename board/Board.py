@@ -5,7 +5,6 @@ from piece.Knight import Knight
 from piece.Pawn import Pawn
 from piece.Queen import Queen
 from piece.Rook import Rook
-import board.DrawBoard as db
 from board.AlgebraicNotation import AlgebraicNotation
 from iteration_utilities import duplicates
 import pickle
@@ -13,12 +12,11 @@ import sys
 
 class Board():
     
-    def __init__(self, display, fen):
-        #constants. SIZE is pixel LENGTH of each square on the board and LENGTH is how many squares per column or row.
-        self.SIZE = 100
-        self.LENGTH = 8
+    def __init__(self, fen):   
         self.WHITE = 0
         self.BLACK = 1
+        self.LENGTH = 8
+        self.SIZE = 100
         
         #self explanatory
         self.pieces_on_board = []
@@ -36,7 +34,6 @@ class Board():
         self.copy_of_is_enpassant = False
         self.fen = fen 
         self.an = AlgebraicNotation()
-        self.display = display
         
         #holds the board with all the squares and if there is a piece then an object is there, else it is NoneType
         self.board = [[None for i in range(self.LENGTH)] for j in range(self.LENGTH)]
@@ -65,30 +62,6 @@ class Board():
     
     def white_to_move(self):
         return True if self.color_to_move == self.WHITE else False
-        
-    def draw_board(self):
-        db.draw_board(self.display)
-                        
-    def load_pieces(self):
-        db.load_pieces()
-            
-    def draw_pieces(self):
-        db.draw_pieces(self.board, self.display)
-    
-    def drag_piece(self, mouse_pos):
-        db.drag_piece(mouse_pos, self.board, self.display)
-        
-    def draw_moves(self):
-        db.draw_moves(self.display)
-        
-    def initialize_show_square(self):
-        db.initialize_show_square(self.display)
-        
-    def show_square(self, mouse_position):
-        db.show_square(mouse_position, self.display)
-        
-    def piece_held(self, piece_held):
-        db.piece_held = piece_held
                     
     def get_square_from_mouse_pos(self, mouse_pos):
         return (math.floor(mouse_pos[0] / self.SIZE), math.floor(mouse_pos[1] / self.SIZE))

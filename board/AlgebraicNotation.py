@@ -59,15 +59,16 @@ class AlgebraicNotation():
         return self.files[-(num + 1)]
     
     def get_square_from_algebraic_notation(self, move):
+        #print(f"move is {move}")
+        if move[-1].isnumeric():
+            square = move[-2:]
+            return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1)
+        if move[2] == "=":
+            square = move[-4:-2]
+            return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1)
         if move[-1] in "$#+":
             square = move[-3:-1]
             return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1) 
-        elif not move[-1].isalpha():
-            square = move[-2:]
-            return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1)
-        else:
-            square = move[-4:-2]
-            return (self.ranks.index(square[0]), self.files[(-int(square[1]))] - 1)
 
     def get_castle_square_from_algebraic_notation(self, move, piece):
         if move == "O-O":

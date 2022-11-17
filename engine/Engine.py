@@ -36,11 +36,17 @@ class Engine():
         self.create_root_node()
         for _ in range(self.depth):
             self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
-            with Pool(5) as p:
-                p.map(self.process_current_child, self.nodes_to_look_at)
+            for node in self.nodes_to_look_at:
+                self.process_current_child(node)
+            self.nodes_to_look_at = []
             self.nodes_to_look_at = self.children
             self.children = []
+            print(f"size of children {len(self.nodes_to_look_at)}")
         self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
+        
+        for child in self.root.children:
+            print(f"child move {child.move}")
+            
         move = self.root.get_children()[0].move
         for piece in self.pieces_on_board:
             if move in piece.get_moves():
@@ -70,10 +76,10 @@ class Engine():
             for piece in node_pieces_on_board:
                 if move in piece.get_moves():
                     self.board_obj.make_move(move, piece, node_board, node_pieces_on_board)
-                    #board = pickle.loads(pickle.dumps(self.board_obj.get_copy_board(), -1))
-                    board = self.board_obj.get_copy_board()
-                    #pieces_on_board = pickle.loads(pickle.dumps(self.board_obj.get_copy_pieces_on_board(), -1))
-                    pieces_on_board = self.board_obj.get_copy_pieces_on_board()
+                    board = pickle.loads(pickle.dumps(self.board_obj.get_copy_board(), -1))
+                    #board = self.board_obj.get_copy_board()
+                    pieces_on_board = pickle.loads(pickle.dumps(self.board_obj.get_copy_pieces_on_board(), -1))
+                    #pieces_on_board = self.board_obj.get_copy_pieces_on_board()
                     children.append(Node(move=move, board=board, pieces_on_board=pieces_on_board, root=node))
                     break  
                   

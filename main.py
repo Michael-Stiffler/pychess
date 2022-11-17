@@ -1,6 +1,7 @@
 import sys
 import pygame as py
 from board.Board import Board
+from board.DrawBoard import DrawBoard
 from engine.Engine import Engine
 import cProfile
 import pstats
@@ -14,15 +15,19 @@ from board.AlgebraicNotation import AlgebraicNotation
 
 def main():
     py.init()
+    
     #board = Board(display=py.display.set_mode((800, 800)), fen='2r3r1/4N3/RN6/8/8/7Q/R7/5Q2 w - - 0 1')
-    #board = Board(display=py.display.set_mode((800, 800)),  fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-    #board = Board(display=py.display.set_mode((800, 800)),  fen='2kr3r/p1ppqpb1/bn2Qnp1/3PN3/1p2P3/2N5/PPPBBPPP/R3K2R b KQ - 3 2')
-    #board = Board(display=py.display.set_mode((800, 800)), fen='rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9')
-    #board = Board(display=py.display.set_mode((800, 800)), fen='r1bqkb1r/pp1ppppp/2p2n2/5n2/P1B2N2/4PN2/1PPP1PPP/R1BQK2R w kq - 1 10')
-    #board = Board(display=py.display.set_mode((800, 800)), fen='5k2/2p2b2/8/3P4/2K5/8/8/8 b - - 0 1')
-    board = Board(display=py.display.set_mode((800, 800)), fen='5k2/1Q6/5K2/8/8/8/8/8 w - - 0 1')
+    #board = Board(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    #board = Board(fen='2kr3r/p1ppqpb1/bn2Qnp1/3PN3/1p2P3/2N5/PPPBBPPP/R3K2R b KQ - 3 2')
+    #board = Board(fen='rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9')
+    #board = Board(fen='r1bqkb1r/pp1ppppp/2p2n2/5n2/P1B2N2/4PN2/1PPP1PPP/R1BQK2R w kq - 1 10')
+    board = Board(fen='5k2/2p2b2/8/3P4/2K5/8/8/8 b - - 0 1')
+    #board = Board(fen='5k2/1Q6/5K2/8/8/8/8/8 w - - 0 1')
+    
+    db = DrawBoard(display=py.display.set_mode((800, 800)))
     engine = Engine(board=board, depth=3)
     an = AlgebraicNotation()
+    
     running = True
     need_to_calculate_moves = True
     holding_piece = False
@@ -30,14 +35,14 @@ def main():
     clock = py.time.Clock()
 
     board.parse_fen()
-    board.load_pieces()
-    board.draw_board()
-    board.draw_pieces()
-    board.initialize_show_square()
+    db.load_pieces()
+    db.draw_board()
+    db.draw_pieces(board.get_board())
+    db.initialize_show_square()
     
     while running:
         mouse_pos = py.mouse.get_pos()
-        board.show_square(mouse_pos)
+        db.show_square(mouse_pos)
     
         if need_to_calculate_moves:
             with cProfile.Profile() as pr:
@@ -48,20 +53,20 @@ def main():
                     move, piece = engine.find_best_move()
                     board.make_move(move, piece)
                     board.switch_color_to_move() 
-                    board.draw_board()
-                    board.draw_pieces()
+                    db.draw_board()
+                    db.draw_pieces(board.get_board())
                     board.get_piece_moves() 
         
-            stats = pstats.Stats(pr)
-            stats.sort_stats(pstats.SortKey.TIME)
-            stats.print_stats()  
+            # stats = pstats.Stats(pr)
+            # stats.sort_stats(pstats.SortKey.TIME)
+            # stats.print_stats()  
             
             need_to_calculate_moves = False   
         
         if holding_piece:
-            board.draw_board()
-            board.draw_moves()
-            board.drag_piece(mouse_pos)
+            db.draw_board()
+            db.draw_moves()
+            db.drag_piece(mouse_pos, board.get_board())
  
         for event in py.event.get():            
             if event.type == py.QUIT:
@@ -72,7 +77,7 @@ def main():
                 print(square_pos_on_mouse_down) 
                 piece = board.return_piece_on_square(square_pos_on_mouse_down)
                 if piece and piece.color == user_color:
-                    board.piece_held(piece) 
+                    db.piece_held = piece 
                     holding_piece = True
             elif event.type == py.MOUSEBUTTONUP:
                 square_pos_on_mouse_up = board.get_square_from_mouse_pos(mouse_pos)
@@ -84,8 +89,8 @@ def main():
                         board.make_move(move, piece)
                         board.switch_color_to_move() 
                         need_to_calculate_moves = True  
-                board.draw_board()
-                board.draw_pieces()
+                db.draw_board()
+                db.draw_pieces(board.get_board())
                 holding_piece = False
 
         py.display.flip()
