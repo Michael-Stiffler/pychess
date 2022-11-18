@@ -136,22 +136,24 @@ class Board():
         return legal_moves
     
     def check_if_game_over(self, move, piece, board, pieces_on_board):
-        self.copy_of_board = pickle.loads(pickle.dumps(board, -1))
-        self.copy_of_pieces_on_board = pickle.loads(pickle.dumps(pieces_on_board, -1))
-        self.make_move(move, piece, board=self.copy_of_board, pieces_on_board=self.copy_of_pieces_on_board)
+        copy_of_board = pickle.loads(pickle.dumps(board, -1))
+        copy_of_pieces_on_board = pickle.loads(pickle.dumps(pieces_on_board, -1))
+        self.make_move(move, piece, board=copy_of_board, pieces_on_board=copy_of_pieces_on_board)
         moves = []
+        
         self.switch_color_to_move()
     
-        for piece in pieces_on_board:
+        for piece in copy_of_pieces_on_board:
             if piece.color == self.color_to_move:
-                moves.extend(self.check_legal_moves(piece, self.copy_of_board, self.copy_of_pieces_on_board))
+                #this needs to be changed
+                moves.extend(self.check_legal_moves(piece, copy_of_board, copy_of_pieces_on_board))
                                         
         if len(moves) == 0:
-            if self.king_in_check(board):
+            if self.king_in_check(copy_of_board):
                 return "checkmate"
             else:
                 return "stalemate"
-        if self.king_in_check(board):
+        if self.king_in_check(copy_of_board):
             return "in check"
         return ""
         

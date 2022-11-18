@@ -25,7 +25,7 @@ def main():
     #board = Board(fen='5k2/1Q6/5K2/8/8/8/8/8 w - - 0 1')
     
     db = DrawBoard(display=py.display.set_mode((800, 800)))
-    engine = Engine(board=board, depth=3)
+    engine = Engine(board=board, depth=2)
     an = AlgebraicNotation()
     
     running = True
@@ -56,6 +56,7 @@ def main():
                     db.draw_board()
                     db.draw_pieces(board.get_board())
                     board.get_piece_moves() 
+                    engine.reset_tree()
         
             # stats = pstats.Stats(pr)
             # stats.sort_stats(pstats.SortKey.TIME)

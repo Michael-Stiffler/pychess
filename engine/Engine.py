@@ -41,11 +41,10 @@ class Engine():
             self.nodes_to_look_at = []
             self.nodes_to_look_at = self.children
             self.children = []
-            print(f"size of children {len(self.nodes_to_look_at)}")
-        self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
         
-        for child in self.root.children:
-            print(f"child move {child.move}")
+        if self.depth % 2 != 0:
+            self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
+        
             
         move = self.root.get_children()[0].move
         for piece in self.pieces_on_board:
@@ -82,8 +81,16 @@ class Engine():
                     #pieces_on_board = self.board_obj.get_copy_pieces_on_board()
                     children.append(Node(move=move, board=board, pieces_on_board=pieces_on_board, root=node))
                     break  
-                  
+        
         return children
+    
+    def reset_tree(self):
+        self.pieces_on_board = []
+        self.current_board = [[]]
+        self.moves_in_current_board = []
+        self.nodes_to_look_at = []
+        self.root = None
+        self.children = []
     
     if __name__ == "__main__":
         pass
