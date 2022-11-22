@@ -2,6 +2,7 @@ from board.AlgebraicNotation import AlgebraicNotation
 import pickle
 import os
 import sys
+import random
 from engine.Node import Node
 from multiprocessing import Pool
 
@@ -46,6 +47,9 @@ class Engine():
             self.board_obj.color_to_move = 1 if self.board_obj.color_to_move == 0 else 0
 
         move = self.root.get_children()[0].move
+        
+        node = random.choice(self.root.get_children())
+        move = node.move
         for piece in self.pieces_on_board:
             if move in piece.get_moves():
                 return move, piece
