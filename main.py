@@ -17,12 +17,13 @@ def main():
     py.init()
 
     #board = Board(display=py.display.set_mode((800, 800)), fen='2r3r1/4N3/RN6/8/8/7Q/R7/5Q2 w - - 0 1')
-    #board = Board(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    board = Board(
+        fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     #board = Board(fen='2kr3r/p1ppqpb1/bn2Qnp1/3PN3/1p2P3/2N5/PPPBBPPP/R3K2R b KQ - 3 2')
     #board = Board(fen='rn1q1rk1/ppp2ppp/4pn2/3p4/1b1P4/N1N1P1P1/PPPB1PBP/R2QKbR1 b Q - 8 9')
     #board = Board(fen='r1bqkb1r/pp1ppppp/2p2n2/5n2/P1B2N2/4PN2/1PPP1PPP/R1BQK2R w kq - 1 10')
     #board = Board(fen='5k2/2p2b2/8/3P4/2K5/8/8/8 b - - 0 1')
-    board = Board(fen='5k2/1Q6/5K2/8/8/8/8/8 w - - 0 1')
+    #board = Board(fen='5k2/1Q6/5K2/8/8/8/8/8 w - - 0 1')
 
     db = DrawBoard(display=py.display.set_mode((800, 800)))
     engine = Engine(board=board, depth=2)
@@ -74,17 +75,20 @@ def main():
                 running = False
                 sys.exit()
             elif event.type == py.MOUSEBUTTONDOWN:
-                square_pos_on_mouse_down = board.get_square_from_mouse_pos(mouse_pos)
+                square_pos_on_mouse_down = board.get_square_from_mouse_pos(
+                    mouse_pos)
                 print(square_pos_on_mouse_down)
                 piece = board.return_piece_on_square(square_pos_on_mouse_down)
                 if piece and piece.color == board.color_to_move:
                     db.piece_held = piece
                     holding_piece = True
             elif event.type == py.MOUSEBUTTONUP:
-                square_pos_on_mouse_up = board.get_square_from_mouse_pos(mouse_pos)
+                square_pos_on_mouse_up = board.get_square_from_mouse_pos(
+                    mouse_pos)
                 print(square_pos_on_mouse_up)
                 if square_pos_on_mouse_down != square_pos_on_mouse_up:
-                    move = board.check_user_move(square_pos_on_mouse_down, square_pos_on_mouse_up)
+                    move = board.check_user_move(
+                        square_pos_on_mouse_down, square_pos_on_mouse_up)
                     if move:
                         piece = board.return_piece_on_square(
                             square_pos_on_mouse_down)
