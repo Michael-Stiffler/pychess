@@ -1,4 +1,4 @@
-from board.AlgebraicNotation import AlgebraicNotation
+from board.AlgebraicNotation import *
 import os
 import sys
 
@@ -8,7 +8,6 @@ sys.path.append(os.path.abspath(os.path.join(dir_path, os.pardir)))
 
 class Rook():
     def __init__(self, x, y, color, filename):
-        self.an = AlgebraicNotation()
         self.moves = []
         self.moves_no_algebraic_notation = []
         self.x = x
@@ -26,11 +25,11 @@ class Rook():
         for x in range(self.x + 1, 8):
             move = (x, self.y)
             if board[move[1]][move[0]] is None:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, False))
                 self.moves_no_algebraic_notation.append(move)
             elif board[move[1]][move[0]].color != self.color:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, True))
                 self.moves_no_algebraic_notation.append(move)
                 break
@@ -40,11 +39,11 @@ class Rook():
         for x in range(self.x - 1, -1, -1):
             move = (x, self.y)
             if board[move[1]][move[0]] is None:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, False))
                 self.moves_no_algebraic_notation.append(move)
             elif board[move[1]][move[0]].color != self.color:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, True))
                 self.moves_no_algebraic_notation.append(move)
                 break
@@ -54,11 +53,11 @@ class Rook():
         for y in range(self.y + 1, 8):
             move = (self.x, y)
             if board[move[1]][move[0]] is None:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, False))
                 self.moves_no_algebraic_notation.append(move)
             elif board[move[1]][move[0]].color != self.color:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, True))
                 self.moves_no_algebraic_notation.append(move)
                 break
@@ -68,11 +67,11 @@ class Rook():
         for y in range(self.y - 1, -1, -1):
             move = (self.x, y)
             if board[move[1]][move[0]] is None:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, False))
                 self.moves_no_algebraic_notation.append(move)
             elif board[move[1]][move[0]].color != self.color:
-                self.moves.append(self.an.get_rook_algebraic_notation(
+                self.moves.append(get_rook_algebraic_notation(
                     current_position, move, True))
                 self.moves_no_algebraic_notation.append(move)
                 break

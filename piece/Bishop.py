@@ -1,4 +1,4 @@
-from board.AlgebraicNotation import AlgebraicNotation
+from board.AlgebraicNotation import *
 import os
 import sys
 
@@ -8,7 +8,6 @@ sys.path.append(os.path.abspath(os.path.join(dir_path, os.pardir)))
 
 class Bishop():
     def __init__(self, x, y, color, filename):
-        self.an = AlgebraicNotation()
         self.moves = []
         self.moves_no_algebraic_notation = []
         self.x = x
@@ -29,11 +28,11 @@ class Bishop():
                 move = (diagonal[0] + self.x, diagonal[1] + self.y)
                 if move[0] >= 0 and move[0] <= 7 and move[1] >= 0 and move[1] <= 7:
                     if board[move[1]][move[0]] is None:
-                        self.moves.append(self.an.get_bishop_algebraic_notation(
+                        self.moves.append(get_bishop_algebraic_notation(
                             current_position, move, False))
                         self.moves_no_algebraic_notation.append(move)
                     elif board[move[1]][move[0]].color != self.color:
-                        self.moves.append(self.an.get_bishop_algebraic_notation(
+                        self.moves.append(get_bishop_algebraic_notation(
                             current_position, move, True))
                         self.moves_no_algebraic_notation.append(move)
                         bishop_diagonals.remove(diagonal)

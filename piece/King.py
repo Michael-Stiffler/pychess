@@ -1,4 +1,4 @@
-from board.AlgebraicNotation import AlgebraicNotation
+from board.AlgebraicNotation import *
 import os
 import sys
 
@@ -9,7 +9,6 @@ sys.path.append(os.path.abspath(os.path.join(dir_path, os.pardir)))
 
 class King():
     def __init__(self, x, y, color, filename):
-        self.an = AlgebraicNotation()
         self.moves = []
         self.moves_no_algebraic_notation = []
         self.can_castle_kingside = True
@@ -31,7 +30,7 @@ class King():
                 if current_position == (4, 7) and isinstance(board[7][7], Rook):
                     if board[7][5] is None and board[7][6] is None:
                         self.moves.append(
-                            self.an.get_king_castle_notation(True))
+                            get_king_castle_notation(True))
                         self.moves_no_algebraic_notation.append((6, 7))
                 else:
                     self.can_castle_kingside = False
@@ -39,7 +38,7 @@ class King():
                 if current_position == (4, 0) and isinstance(board[0][7], Rook):
                     if board[0][5] is None and board[0][6] is None:
                         self.moves.append(
-                            self.an.get_king_castle_notation(True))
+                            get_king_castle_notation(True))
                         self.moves_no_algebraic_notation.append((6, 0))
                 else:
                     self.can_castle_kingside = False
@@ -48,7 +47,7 @@ class King():
                 if current_position == (4, 7) and isinstance(board[7][0], Rook):
                     if board[7][3] is None and board[7][2] is None and board[7][1] is None:
                         self.moves.append(
-                            self.an.get_king_castle_notation(False))
+                            get_king_castle_notation(False))
                         self.moves_no_algebraic_notation.append((2, 7))
                 else:
                     self.can_castle_queenside = False
@@ -56,7 +55,7 @@ class King():
                 if current_position == (4, 0) and isinstance(board[0][0], Rook):
                     if board[0][3] is None and board[0][2] is None and board[0][1] is None:
                         self.moves.append(
-                            self.an.get_king_castle_notation(False))
+                            get_king_castle_notation(False))
                         self.moves_no_algebraic_notation.append((2, 0))
                 else:
                     self.can_castle_queenside = False
@@ -68,11 +67,11 @@ class King():
                 move = (self.x+x, self.y+y)
                 if move[0] >= 0 and move[0] <= 7 and move[1] >= 0 and move[1] <= 7:
                     if board[move[1]][move[0]] is None:
-                        self.moves.append(self.an.get_king_algebraic_notation(
+                        self.moves.append(get_king_algebraic_notation(
                             current_position, move, False))
                         self.moves_no_algebraic_notation.append(move)
                     elif board[move[1]][move[0]].color != self.color:
-                        self.moves.append(self.an.get_king_algebraic_notation(
+                        self.moves.append(get_king_algebraic_notation(
                             current_position, move, True))
                         self.moves_no_algebraic_notation.append(move)
 
